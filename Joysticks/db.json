@@ -1,0 +1,24 @@
+{
+    "_default": {
+        "1": {
+            "name": "Karlsberg",
+            "quantity": 0
+        },
+        "2": {
+            "name": "Bitburger",
+            "quantity": 0
+        },
+        "3": {
+            "name": "AlkFrei",
+            "quantity": 0
+        },
+        "4": {
+            "name": "Radler",
+            "quantity": 0
+        },
+        "5": {
+            "name": "Insgesamt",
+            "quantity": 0
+        }
+    }
+}
