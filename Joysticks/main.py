@@ -3,52 +3,13 @@ import time
 from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 from tinydb import TinyDB, Query
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import pymsteams
 
 
-def mail(name: str):
-    # Serverdaten
-    #smtpServer = "smtp.gmail.com"#"pim.hypoport.de"
-    #smtpPort = 587
-    mailserver = smtplib.SMTP('pim.hypoport.de', '25')
-
-    # Zugangsdaten
-    username = ""
-    password = ""
-
-    # Sender & Empfänger
-    sender = ""
-    reciever = ""
-
-    # Betreff & Inhalt
-    subject = "BierKühlschrank"
-    body = name + " Auffüllen"
-
-    # Message Objekt für die E-Mail
-    # später kann an dieses Objekt eine
-    # oder mehrere Dateien angehängt
-    # werden.
-    msg = MIMEMultipart()
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = reciever
-
-    part = MIMEText(body, 'plain')
-    msg.attach(part)
-
-    # Erzeugen einer Mail Session
-    smtpObj = smtplib.SMTP(mailserver)
-    # Debuginformationen auf der Konsole ausgeben
-    smtpObj.set_debuglevel(1)
-    # Wenn der Server eine Authentifizierung benötigt dann...
-    smtpObj.ehlo()
-    smtpObj.starttls()
-    smtpObj.login(username, password)
-
-    # absenden der E-Mail
-    smtpObj.sendmail(sender, reciever, msg.as_string())
+def msg(name: str):
+    myTeamsMessage = pymsteams.connectorcard("https://hypoportsystems.webhook.office.com/webhookb2/aade4e90-7a75-45df-9c84-66bbb7fbbd01@8899db84-419b-4a2f-a612-4b819ec57add/IncomingWebhook/2f39b69d9bcc486dbc0a3a94ac114910/641a193c-43e2-445b-9b6b-f1e26a9bec6f")
+    myTeamsMessage.text(name + " auffüllen")
+    myTeamsMessage.send()
 
 
 db = TinyDB("db.json")
@@ -80,28 +41,28 @@ def key_received(key):
         countup(name)
         countup("Insgesamt")  # hier drin da es sonst 2x zählt zu faul für fix
         if db.get(Bier.name == name)["quantity"] == 10:
-            mail(name)
+            msg(name)
 
     if key == "Button 1" and key.value == 1:  # Bitburger Gelb mit Zettel
         name = "Bitburger"
         countup(name)
         countup("Insgesamt")
         if db.get(Bier.name == name)["quantity"] == 10:
-            mail(name)
+            msg(name)
 
     if key == "Button 2" and key.value == 1:  # Radler Gelb ohne Zettel
         name = "Radler"
         countup(name)
         countup("Insgesamt")
         if db.get(Bier.name == name)["quantity"] == 10:
-            mail(name)
+            msg(name)
 
     if key == "Button 3" and key.value == 1:  # AlkFrei Blau
         name = "Alkfrei"
         countup(name)
         countup("Insgesamt")
         if db.get(Bier.name == name)["quantity"] == 10:
-            mail(name)
+            msg(name)
 
     if key == "Button 4" and key.value == 1:  # Rot Emergency
         print(key)
