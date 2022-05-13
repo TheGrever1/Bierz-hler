@@ -1,24 +1,25 @@
 import random
 import time
+import pymsteams
+import playsound
 from pygame import key
 from pygame import mixer
 from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 from tinydb import TinyDB, Query
 
-import pymsteams
-
-import playsound
-
 
 def msg(name: str):
-    myTeamsMessage = pymsteams.connectorcard("https://hypoportsystems.webhook.office.com/webhookb2/aade4e90-7a75-45df-9c84-66bbb7fbbd01@8899db84-419b-4a2f-a612-4b819ec57add/IncomingWebhook/2f39b69d9bcc486dbc0a3a94ac114910/641a193c-43e2-445b-9b6b-f1e26a9bec6f")
+    myTeamsMessage = pymsteams.connectorcard(
+        "https://hypoportsystems.webhook.office.com/webhookb2/aade4e90-7a75-45df-9c84-66bbb7fbbd01@8899db84-419b-4a2f-a612-4b819ec57add/IncomingWebhook/2f39b69d9bcc486dbc0a3a94ac114910/641a193c-43e2-445b-9b6b-f1e26a9bec6f"
+    )
     myTeamsMessage.text(name + " auffüllen")
-    #myTeamsMessage.send()
+    myTeamsMessage.send()
 
 
 db = TinyDB("db.json")
 Bier = Query()
-keyAlt = 0
+keyAlt = None
+
 
 def print_add(joy):
     print("Added", joy)
@@ -37,6 +38,7 @@ def countup(name: str):
 def reset(name: str):
     db.update({"quantity": 0}, Bier.name == name)
 
+
 def switch_urpils(argument):
     switcher = {
         1: "139-item-catch.mp3",
@@ -54,9 +56,10 @@ def switch_urpils(argument):
         13: "pokemon-german.mp3",
         14: "tmpdbnm_5a3.mp3",
         15: "tralala_1.mp3",
-        16: "was-geht-aaaaaaaab.mp3"
+        16: "was-geht-aaaaaaaab.mp3",
     }
     return str(switcher.get(argument))
+
 
 def switch_noturpils(argument):
     switcher = {
@@ -87,9 +90,10 @@ def switch_noturpils(argument):
         25: "sieht-nicht-gut-aus.mp3",
         26: "spongebob-fail.mp3",
         27: "werner-bist-du-blod.mp3",
-        28: "you_were_banned_2.mp3"
+        28: "you_were_banned_2.mp3",
     }
     return str(switcher.get(argument))
+
 
 def play_sound(name: str):
     mixer.init()
@@ -106,8 +110,8 @@ def play_sound(name: str):
 
 
 def key_received(key):
-
-    if key == "Button 0" and key.value == 1:  # Grün Urplis
+    global keyAlt
+    if key == "Button 0" and key.value == 1 and keyAlt != "Button 4":  # Grün Urplis
         name = "Karlsberg"
         countup(name)
         play_sound(name)
@@ -115,8 +119,9 @@ def key_received(key):
         if db.get(Bier.name == name)["quantity"] == 10:
             msg(name)
 
-
-    if key == "Button 1" and key.value == 1:  # Bitburger Gelb mit Zettel
+    if (
+        key == "Button 1" and key.value == 1 and keyAlt != "Button 4"
+    ):  # Bitburger Gelb mit Zettel
         name = "Bitburger"
         countup(name)
         countup("Insgesamt")
@@ -124,7 +129,9 @@ def key_received(key):
         if db.get(Bier.name == name)["quantity"] == 10:
             msg(name)
 
-    if key == "Button 2" and key.value == 1:  # Radler Gelb ohne Zettel
+    if (
+        key == "Button 2" and key.value == 1 and keyAlt != "Button 4"
+    ):  # Radler Gelb ohne Zettel
         name = "Radler"
         countup(name)
         countup("Insgesamt")
@@ -132,7 +139,7 @@ def key_received(key):
         if db.get(Bier.name == name)["quantity"] == 10:
             msg(name)
 
-    if key == "Button 3" and key.value == 1:  # AlkFrei Blau
+    if key == "Button 3" and key.value == 1 and keyAlt != "Button 4":  # AlkFrei Blau
         name = "AlkFrei"
         countup(name)
         countup("Insgesamt")
@@ -140,32 +147,17 @@ def key_received(key):
         if db.get(Bier.name == name)["quantity"] == 10:
             msg(name)
 
-    if keyAlt == "Button 4":
-        keyAlt = ""
+    if keyAlt == key and key.value == 1:
         if key == "Button 4" and key.value == 1:
-            reset("insgesamt")
             reset("Karlsberg")
             reset("Bitburger")
             reset("Radler")
             reset("AlkFrei")
 
-    if key == "Button 4" and key.value == 1:
-        if keyAlt == "":
-            keyAlt = "Button 4"
-
-    if key == "Button 4" and key == "Button 3" and key.value == 1:  # Reset Alkfrei
-        reset("AlkFrei")
-
-    if key == "Button 4" and key == "Button 2" and key.value == 1:  # Reset Radler
-        reset("Radler")
-
-    if key == "Button 4" and key == "Button 1" and key.value == 1:  # Reset Bitburger
-        reset("Bitburger")
-
-    if key == "Button 4" and key == "Button 0" and key.value == 1:  # Reset Karlsberg
-        reset("Karlsberg")
+    if key.value == 1:
+        keyAlt = key
 
     time.sleep(0.5)
 
-    keyAlt=key
+
 run_event_loop(print_add, print_remove, key_received)
